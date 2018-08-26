@@ -1,5 +1,9 @@
 #include "tp0.h"
 
+void validarRetornoConexion(int retorno);
+void validarRetornoMensaje(int retorno);
+void validarSiEsHolaLoRecibido(char * recibido);
+
 int main() {
   configure_logger();
   int socket = connect_to_server(IP, PUERTO);
@@ -19,7 +23,32 @@ void configure_logger() {
         mostrarse por pantalla y mostrar solo los logs de nivel info para arriba
         (info, warning y error!)
   */
-  // logger = /* 1. */;
+	logger=log_create("/home/utnso/Logs/tp0.log", "tp0", 1, LOG_LEVEL_INFO);
+}
+
+void validarRetornoConexion(int retorno) {
+	/*
+	 3.1 Recuerden chequear por si no se pudo contectar (usando el retorno de connect()).
+	 Si hubo un error, lo loggeamos y podemos terminar el programa con la funcioncita
+	 exit_gracefully pasandole 1 como parametro para indicar error ;).
+	 Pss, revisen los niveles de log de las commons.
+	 */
+	if (retorno < 0) {
+		log_error(logger, "No se pudo conectar la ip");
+		exit_gracefully(1);
+	}
+}
+
+void validarRetornoMensaje(int retorno) {
+	if (retorno < 0) {
+		log_error(logger, "No se se obtuvo ningun mensaje");
+	}
+}
+
+void validarSiEsHolaLoRecibido(char * recibido){
+	if(string_equals_ignore_case(recibido, "hola")){
+		log_info(logger, "No recibio el hola");
+	}
 }
 
 int connect_to_server(char * ip, char * port) {
@@ -33,11 +62,10 @@ int connect_to_server(char * ip, char * port) {
   getaddrinfo(ip, port, &hints, &server_info);  // Carga en server_info los datos de la conexion
 
   // 2. Creemos el socket con el nombre "server_socket" usando la "server_info" que creamos anteriormente
-  int server_socket = 0; //Eliminar esta linea luego de completar la anterior
-  // int server_socket = socket(/* familia, socktype, protocolo */);
+  int server_socket = socket(server_info->ai_family, server_info->ai_socktype, server_info->ai_protocol);
 
   // 3. Conectemosnos al server a traves del socket! Para eso vamos a usar connect()
-  // int retorno = connect(/* socket, address, longitud de la address */);
+  int retorno = connect(server_socket,  server_info->ai_addr, server_info->ai_addrlen);
 
   freeaddrinfo(server_info);  // No lo necesitamos mas
 
@@ -47,6 +75,7 @@ int connect_to_server(char * ip, char * port) {
         exit_gracefully pasandole 1 como parametro para indicar error ;).
         Pss, revisen los niveles de log de las commons.
   */
+  validarRetornoConexion(retorno);
 
   // 4 Logeamos que pudimos conectar y retornamos el socket
   log_info(logger, "Conectado!");
@@ -54,7 +83,7 @@ int connect_to_server(char * ip, char * port) {
 }
 
 void  wait_hello(int socket) {
-  char * hola = "SYSTEM UTNSO 0.1";
+  char * hola = "hola";
 
   /*
     5.  Ya conectados al servidor, vamos a hacer un handshake!
@@ -64,14 +93,15 @@ void  wait_hello(int socket) {
         variable "hola". Entonces, vamos por partes:
         5.1.  Reservemos memoria para un buffer para recibir el mensaje.
   */
-  // char * buffer = malloc(/*5.1*/);
+  size_t holaBinaryLengh = strlen(hola) + 1;
+  char * buffer = malloc(holaBinaryLengh);
   /*
         5.2.  Recibamos el mensaje en el buffer.
         Recuerden el prototipo de recv:
         conexión - donde guardar - cant de bytes - flags(si no se pasa ninguno puede ir NULL)
         Nota: Palabra clave MSG_WAITALL.
   */
-  // int result_recv = recv(/*5.2*/);
+	int result_recv = recv(socket, &buffer, holaBinaryLengh, NULL);
   /*
         5.3.  Chequiemos errores al recibir! (y logiemos, por supuesto)
         5.4.  Comparemos lo recibido con "hola".
@@ -79,7 +109,11 @@ void  wait_hello(int socket) {
         No se olviden de loggear y devolver la memoria que pedimos!
         (si, también si falló algo, tenemos que devolverla, atenti.)
   */
+  validarRetornoMensaje(result_recv);
+  validarSiEsHolaLoRecibido(&buffer);
+  printf("Nos devolvio %s",buffer);
 
+  free(buffer);
 }
 
 Alumno read_hello() {
@@ -104,7 +138,7 @@ Alumno read_hello() {
   /*
     8.    Realine nos va a devolver un cacho de memoria ya reservada
           con lo que leyo del teclado hasta justo antes del enter (/n).
-          Ahora, nos toca copiar el legajo al la estructura alumno. Como
+          Ahora, nos toca copiar el legajo al de la estructura alumno. Como
           el legajo es numero, conviertanlo a numero con la funcion atoi
           y asignenlo.
           Recuerden liberar la memoria pedida por readline con free()!
@@ -248,4 +282,6 @@ void exit_gracefully(int return_nr) {
           Asi solo necesitamos destruir el logger y usar la llamada al
           sistema exit() para terminar la ejecucion
   */
+	log_destroy(logger);
+	exit(return_nr);
 }
