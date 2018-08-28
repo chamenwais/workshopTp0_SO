@@ -55,4 +55,13 @@ void * wait_content(int socket);
 void send_md5(int socket, void * content);
 void wait_confirmation(int socket);
 void exit_gracefully(int return_nr);
+void validarRetornoConexion(int retorno, int socket);
+void validarRetornoMensaje(int retorno);
+void validarLoRecibido(char * recibido, char * hola);
+void validarRetornoEnvio(int resultado, int socket);
+char * conocerTipoDeContenido(ContentHeader *header);
+bool esDeContenidoVariable(char* tipoDeContenido);
+void validarPosibleErrorDeContenido(int result_recv_content, ContentHeader *header, int socket, void * buff);
+int* castVoidPtrToIntPtr(void* resultBuf);
+void validarLiberacionBuffer(int result, void * buffer);
 #endif /* CLIENTE_H_ */
