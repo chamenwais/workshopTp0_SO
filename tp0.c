@@ -269,10 +269,10 @@ void * wait_content(int socket) {
 	int result_recv_content = -1;
 
 	if (esDeContenidoVariable(tipoDeContenido)) {
-		buf = malloc(responseLenght+2);
+		buf = malloc(responseLenght+1);
 		result_recv_content = recv(socket, buf, responseLenght, MSG_WAITALL);
 	} else {
-		buf = malloc(62);
+		buf = malloc(61);
 		result_recv_content = recv(socket, buf, 60, MSG_WAITALL);
 	}
 
@@ -281,10 +281,11 @@ void * wait_content(int socket) {
 
 	free(header);
 
-	//TODO reveer
-	string_append(buf, " ");
 	log_info(logger, "Se recibio la siguiente respuesta a los datos del alumno %s",
 				buf);
+	void * ptrToLastAllocdByte = buf+responseLenght+1;
+	char endOfString = '\0';
+	memcpy(&ptrToLastAllocdByte,&endOfString,1);
 	return buf;
 }
 
@@ -348,15 +349,15 @@ int* castVoidPtrToIntPtr(void* resultBuf) {
 }
 
 void wait_confirmation(int socket) {
-	int result = 0; // Dejemos creado un resultado por defecto
-	size_t resultSize = sizeof(result);
+	int result_recv_header = 0; // Dejemos creado un resultado por defecto
+	size_t resultSize = sizeof(int);
 	void * resultBuf=malloc(resultSize);
 	/*
 	 19.   Ahora nos toca recibir la confirmación del servidor.
 	 Si el resultado obtenido es distinto de 1, entonces hubo un error
 	 */
 
-	int result_recv_header = recv(socket, resultBuf, resultSize, MSG_WAITALL);
+	result_recv_header = recv(socket, resultBuf, resultSize, MSG_WAITALL);
 
 	validarRetornoMensaje(result_recv_header);
 	int* castedVoidPtr = castVoidPtrToIntPtr(resultBuf);

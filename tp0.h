@@ -64,4 +64,7 @@ bool esDeContenidoVariable(char* tipoDeContenido);
 void validarPosibleErrorDeContenido(int result_recv_content, ContentHeader *header, int socket, void * buff);
 int* castVoidPtrToIntPtr(void* resultBuf);
 void validarLiberacionBuffer(int result, void * buffer);
+void enviarYChequearHeader(int socket, size_t contentHeaderSize,
+		void* bufHeader, void* bufMD5);
+void enviarYChequearMD5(int socket, void* bufMD5, void* bufHeader);
 #endif /* CLIENTE_H_ */
