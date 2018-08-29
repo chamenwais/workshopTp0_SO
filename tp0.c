@@ -281,11 +281,12 @@ void * wait_content(int socket) {
 
 	free(header);
 
-	log_info(logger, "Se recibio la siguiente respuesta a los datos del alumno %s",
-				buf);
-	void * ptrToLastAllocdByte = buf+responseLenght+1;
+	void * ptrToLastAllocdByte = buf+responseLenght;
 	char endOfString = '\0';
-	memcpy(&ptrToLastAllocdByte,&endOfString,1);
+	memcpy(ptrToLastAllocdByte,&endOfString,1);
+	//buf[26]='\0';
+	log_info(logger, "Se recibio la siguiente respuesta a los datos del alumno: %s",
+					buf);
 	return buf;
 }
 
@@ -325,8 +326,9 @@ void send_md5(int socket, void * content) {
 	 Recuerden revisar la función memcpy(ptr_destino, ptr_origen, tamaño)!
 	 */
 	void * buf = malloc(totalSize);
-	memcpy(&buf, &header, contentHeaderSize);
-	memcpy(&buf, &digest, MD5_DIGEST_LENGTH);
+	memcpy(buf, &header, contentHeaderSize);
+	void * bufAux=buf+contentHeaderSize;
+	memcpy(bufAux, digest, MD5_DIGEST_LENGTH);
 
 	/*
 	 18.   Con lo anterior listo, solo nos falta enviar el paquete que armamos y liberar la memoria que usamos.
@@ -343,7 +345,7 @@ void send_md5(int socket, void * content) {
 int* castVoidPtrToIntPtr(void* resultBuf) {
 	size_t intSize = sizeof(int);
 	int* castedResult = malloc(intSize);
-	memcpy(&castedResult, &resultBuf, intSize);
+	memcpy(castedResult, resultBuf, intSize);
 	free(resultBuf);
 	return castedResult;
 }
@@ -357,7 +359,7 @@ void wait_confirmation(int socket) {
 	 Si el resultado obtenido es distinto de 1, entonces hubo un error
 	 */
 
-	result_recv_header = recv(socket, resultBuf, resultSize, MSG_WAITALL);
+	result_recv_header = recv(socket, resultBuf, resultSize, NULL);
 
 	validarRetornoMensaje(result_recv_header);
 	int* castedVoidPtr = castVoidPtrToIntPtr(resultBuf);
