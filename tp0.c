@@ -216,15 +216,6 @@ bool esDeContenidoVariable(char* tipoDeContenido) {
 	return string_equals_ignore_case(tipoDeContenido, "variable");
 }
 
-void liberarMemoriaDeWaitContent(void **buf, ContentHeader** header) {
-	/*
-	 15.   Finalmente, no te olvides de liberar la memoria que pedimos
-	 para el header y retornar el contenido recibido.
-	 */
-	free(header);
-	free(buf);
-}
-
 void validarPosibleErrorDeContenido(int result_recv_content, ContentHeader *header, int socket, void * buff) {
 	if (result_recv_content <= 0) {
 		free(header);
@@ -281,10 +272,8 @@ void * wait_content(int socket) {
 
 	free(header);
 
-	void * ptrToLastAllocdByte = buf+responseLenght;
-	char endOfString = '\0';
-	memcpy(ptrToLastAllocdByte,&endOfString,1);
-	//buf[26]='\0';
+	char * auxBuf = buf;
+	auxBuf[responseLenght] = '\0';
 	log_info(logger, "Se recibio la siguiente respuesta a los datos del alumno: %s",
 					buf);
 	return buf;
