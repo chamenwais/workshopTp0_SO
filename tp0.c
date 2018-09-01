@@ -320,7 +320,7 @@ void send_md5(int socket, void * content) {
 	//      17.1. Creamos un ContentHeader para guardar un mensaje de id 33 y el tamaño del md5
 	size_t contentHeaderSize = sizeof(ContentHeader);
 	size_t totalSize = MD5_DIGEST_LENGTH + contentHeaderSize;
-	ContentHeader header = { .id = 33, .len = totalSize };
+	ContentHeader header = { .id = 33, .len = MD5_DIGEST_LENGTH };
 	/*
 	 17.2. Creamos un buffer del tamaño del mensaje completo y copiamos el header y la info de "digest" allí.
 	 Recuerden revisar la función memcpy(ptr_destino, ptr_origen, tamaño)!
