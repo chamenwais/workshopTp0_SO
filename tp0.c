@@ -156,10 +156,12 @@ Alumno read_hello() {
 	char * nombre = readline("Nombre: ");
 	char * apellido = readline("Apellido: ");
 	memcpy(alumno.nombre, nombre, strlen(nombre) + 1);
+	free(nombre);
 	// Para la cant de bytes nos conviene usar strlen dado que son cadenas
 	// de caracteres que cumplen el formato de C (terminar en \0)
 	// 9.1. Faltaría armar el del apellido
 	memcpy(alumno.apellido, apellido, strlen(apellido) + 1);
+	free(apellido);
 	// 10. Finalmente retornamos la estructura
 	return alumno;
 }
@@ -329,6 +331,7 @@ void send_md5(int socket, void * content) {
 	validarLiberacionBuffer(resultado, buf);
 	validarRetornoEnvio(resultado, socket);
 	free(buf);
+	free(digest);
 }
 
 int* castVoidPtrToIntPtr(void* resultBuf) {
